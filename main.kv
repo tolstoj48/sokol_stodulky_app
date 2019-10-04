@@ -1,0 +1,208 @@
+#:kivy 1.11.1
+
+<ManagerScreen>:
+	canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    FirstScreen:
+    ATeamScreen:
+    BTeamScreen:
+    CTeamScreen:
+    RozpisyScreen:
+
+<FirstScreen>:
+    name: '_first_screen_'
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            color: 0,0,0,1
+            text: str(b'Hlavn\xc3\xad menu'.decode())
+            size_hint_y: 1
+        Button:
+            size_hint_y: 1
+            text: "Rozpisy sezony 2019-2020"
+            on_release: root.manager.current = "rozpisy"
+        Button:
+            size_hint_y: 1
+            text:  str(b'A-t\xc3\xbdm'.decode())
+            on_release: root.manager.current = str(b'A-t\xc3\xbdm'.decode())
+        Button:
+            size_hint_y: 1
+            text:  str(b'B-t\xc3\xbdm'.decode())
+            on_release: root.manager.current = str(b'B-t\xc3\xbdm'.decode())
+        Button:
+            size_hint_y: 1
+            text:  str(b'C-t\xc3\xbdm'.decode())
+            on_release: root.manager.current = str(b'C-t\xc3\xbdm'.decode())
+
+<ATeamScreen>:
+    name:  str(b'A-t\xc3\xbdm'.decode())
+    BoxLayout:
+        orientation: "vertical"
+        Button:
+            size_hint_y: 0.3
+            text: str(b'Zp\xc4\x9bt na hlavn\xc3\xad menu'.decode())
+            on_release: root.manager.current = "_first_screen_"
+        Label:
+            color: 0,0,0,1
+            size_hint_y: 0.3
+            text: str(b'V\xc3\xbdsledky aktu\xc3\xa1ln\xc3\xad sez\xc3\xb3na A-t\xc3\xbdmu'.decode())
+        UtkaniA:
+
+<BTeamScreen>:
+    name:  str(b'B-t\xc3\xbdm'.decode())
+    BoxLayout:
+        orientation: "vertical"
+        Button:
+            size_hint_y: 0.3
+            text: str(b'Zp\xc4\x9bt na hlavn\xc3\xad menu'.decode())
+            on_release: root.manager.current = "_first_screen_"
+        Label:
+            color: 0,0,0,1
+            size_hint_y: 0.3
+            text: str(b'V\xc3\xbdsledky aktu\xc3\xa1ln\xc3\xad sez\xc3\xb3ny B-t\xc3\xbdmu'.decode())
+        UtkaniB:
+
+<CTeamScreen>:
+    name:  str(b'C-t\xc3\xbdm'.decode())
+    BoxLayout:
+        orientation: "vertical"
+        Button:
+            size_hint_y: 0.3
+            text: str(b'Zp\xc4\x9bt na hlavn\xc3\xad menu'.decode())
+            on_release: root.manager.current = "_first_screen_"
+        Label:
+            color: 0,0,0,1
+            size_hint_y: 0.3
+            text: str(b'V\xc3\xbdsledky aktu\xc3\xa1ln\xc3\xad sez\xc3\xb3ny C-t\xc3\xbdmu'.decode())
+        UtkaniC:
+
+<RozpisyScreen>
+    name: 'rozpisy'
+    BoxLayout:
+        orientation: "vertical"
+        Button:
+            size_hint_y: 0.3
+            text: str(b'Zp\xc4\x9bt na hlavn\xc3\xad menu'.decode())
+            on_release: root.manager.current = "_first_screen_"
+        Label:
+            color: 0,0,0,1
+            size_hint_y: 0.3
+            text: str(b'Rozpis sezony podle t\xc3\xbdmu'.decode())
+        Button:
+            size_hint_y: 0.3
+            text: str(b'Utk\xc3\xa1n\xc3\xad n\xc3\xa1sleduj\xc3\xadc\xc3\xadho t\xc3\xbddne'.decode())
+            on_release: root.manager.current = "rozpisy_aktualni"
+        Button:
+            size_hint_y: 0.3
+            text: str(b'A-t\xc3\xbdm'.decode())
+            on_release: root.manager.current = "rozpis_a"
+        Button:
+            size_hint_y: 0.3
+            text: str(b'B-t\xc3\xbdm'.decode())
+            on_release: root.manager.current = "rozpis_b"
+        Button:
+            size_hint_y: 0.3
+            text: str(b'C-t\xc3\xbdm'.decode())
+            on_release: root.manager.current = "rozpis_c"
+        Button:
+            size_hint_y: 0.3
+            text: str(b'Star\xc5\xa1\xc3\xad dorost'.decode())
+            on_release: root.manager.current = "rozpis_st_d"
+        Button:
+            size_hint_y: 0.3
+            text: str(b'Mlad\xc5\xa1\xc3\xad dorost'.decode())
+            on_release: root.manager.current = "rozpis_ml_d"
+        Button:
+            size_hint_y: 0.3
+            text: str(b'Star\xc5\xa1\xc3\xad \xc5\xbe\xc3\xa1ci'.decode())
+            on_release: root.manager.current = "rozpis_st_z"
+        Button:
+            size_hint_y: 0.3
+            text: str(b'Mlad\xc5\xa1\xc3\xad \xc5\xbe\xc3\xa1ci A'.decode())
+            on_release: root.manager.current = "rozpis_ml_z_a"
+        Button:
+            size_hint_y: 0.3
+            text: str(b'Mlad\xc5\xa1\xc3\xad \xc5\xbe\xc3\xa1ci B'.decode())
+            on_release: root.manager.current = "rozpis_ml_z_b"
+        Button:
+            size_hint_y: 0.3
+            text: str(b'Mlad\xc5\xa1\xc3\xad \xc5\xbe\xc3\xa1ci C'.decode())
+            on_release: root.manager.current = "rozpis_ml_z_c"
+
+<UtkaniA@BoxLayout>:
+    id: utkania
+    orientation: "vertical"
+    RVA:
+        viewclass: "ZapasButton"
+        RecycleBoxLayout:
+            default_size: None, dp(56)
+            default_size_hint: 1, None
+            size_hint_y: None
+            height: self.minimum_height
+            orientation: 'vertical'
+
+<UtkaniB@BoxLayout>:
+    id: utkanib
+    orientation: "vertical"
+    RVB:
+        viewclass: "ZapasButton"
+        RecycleBoxLayout:
+            default_size: None, dp(56)
+            default_size_hint: 1, None
+            size_hint_y: None
+            height: self.minimum_height
+            orientation: 'vertical'
+
+<UtkaniC@BoxLayout>:
+    id: utkanib
+    orientation: "vertical"
+    RVC:
+        viewclass: "ZapasButton"
+        RecycleBoxLayout:
+            default_size: None, dp(56)
+            default_size_hint: 1, None
+            size_hint_y: None
+            height: self.minimum_height
+            orientation: 'vertical'
+
+<ZapasButton@Button>
+    on_release: app.root.current = "%s"%(self.text)
+
+<Button>
+	background_normal: ""
+    background_color: .03,.27,.61,0.85
+	color: 1,1,1,1
+    canvas.before:
+        Color:
+            rgba: 0, 0, 0, 1
+        Line:
+            width: 1
+            rectangle: self.x, self.y, self.width, self.height
+
+<Label>
+	background_normal: ""
+	background_color: .03,.27,.61,0.85
+	padding_x: 10
+	padding_y: 10
+	canvas.before:
+        Color:
+            rgba: 0, 0, 0, 1
+        Line:
+            width: 1
+            rectangle: self.x, self.y, self.width, self.height
+
+<BoxLayout>
+	padding: 10
+
+<ScrollableLabel>:
+    Label:
+        color: 0,0,0,1
+        size_hint_y: None
+        height: self.texture_size[1]
+        text_size: self.width, None
+        markup: True
+        text: root.text
