@@ -1,5 +1,4 @@
 import kivy
-kivy.require("1.11.1")
 from kivy.app import App
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.screenmanager import ScreenManager, Screen
@@ -40,7 +39,7 @@ class RVA(RecycleView):
     def __init__(self, link="", tym="", **kwargs):
         super(RVA, self).__init__(**kwargs)
         app = App.get_running_app()
-        data_matches = get_team_data(data_matches=app.response_matches, 
+        data_matches = app.get_team_data(data_matches=app.response_matches, 
             team="A-tým", matches=True)
         self.data = [{'text': str(values["souperi"]) + " - " + 
         str(values["vysledek"])} for values in data_matches]
@@ -50,7 +49,7 @@ class RVB(RecycleView):
     def __init__(self, link="", tym="", **kwargs):
         super(RVB, self).__init__(**kwargs)
         app = App.get_running_app()
-        data_matches = get_team_data(data_matches=app.response_matches, 
+        data_matches = app.get_team_data(data_matches=app.response_matches, 
             team="B-tým", matches=True)
         self.data = [{'text': str(values["souperi"]) + " - " + 
         str(values["vysledek"])} for values in data_matches]
@@ -60,48 +59,22 @@ class RVC(RecycleView):
     def __init__(self, link="", tym="", **kwargs):
         super(RVC, self).__init__(**kwargs)
         app = App.get_running_app()
-        data_matches = get_team_data(data_matches=app.response_matches, 
+        data_matches = app.get_team_data(data_matches=app.response_matches, 
             team="C-tým", matches=True)
         self.data = [{'text': str(values["souperi"]) + " - " + 
         str(values["vysledek"])} for values in data_matches]
 
-def get_team_data(data_matches="", team="", final="", matches=""):
-    """Format the requested data to suitable list format for all the input
-    data,
-    """
-    if matches == True:
-        a_team = []
-        b_team = []
-        c_team = []
-        for i in data_matches:
-            if i["tym"] == "A-tým":
-                a_team.append(i)
-            elif i["tym"] == "B-tým":
-                b_team.append(i)
-            else:
-                c_team.append(i)
-        if team == "A-tým":
-            return a_team
-        elif team == "B-tým":
-            return b_team
-        elif team == "C-tým":
-            return c_team
-        if final == "all":
-            return data_matches
-    else:
-        return data_matches
-
 class MainApp(App):
     """Main app building class."""
     def build(self):
-        self.icon = 'znak.png'
+        self.icon = 'icon.png'
         self.url_req()
         self.manager = ManagerScreen()
-        data_matches = get_team_data(data_matches=self.response_matches, 
+        data_matches = self.get_team_data(data_matches=self.response_matches, 
             team="", final="all", matches=True)
         for i in data_matches:
             self.fetch_match_detail(i, i["tym"])
-        data_schedules = get_team_data(data_matches=self.response_schedules,
+        data_schedules = self.get_team_data(data_matches=self.response_schedules,
             matches=False)
         data_schedule_choice = ["rozpis_a", "rozpis_b", "rozpis_c", 
         "rozpis_st_d", "rozpis_ml_d", "rozpis_st_z", "rozpis_ml_z_a", 
@@ -197,6 +170,32 @@ class MainApp(App):
         fetch_next_matches() method.
         """
         return "".join(self.response_recent[0])
+
+    def get_team_data(self, data_matches="", team="", final="", matches=""):
+        """Format the requested data to suitable list format for all the input 
+        data,
+        """
+        if matches == True:
+            a_team = []
+            b_team = []
+            c_team = []
+            for i in data_matches:
+                if i["tym"] == "A-tým":
+                    a_team.append(i)
+                elif i["tym"] == "B-tým":
+                    b_team.append(i)
+                else:
+                    c_team.append(i)
+            if team == "A-tým":
+                return a_team
+            elif team == "B-tým":
+                return b_team
+            elif team == "C-tým":
+                return c_team
+            if final == "all":
+                return data_matches
+        else:
+            return data_matches
 
     def switch_screen(self, switch_to, *args, **kwargs):
         """Switches screens on screenmanager."""
