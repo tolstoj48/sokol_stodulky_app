@@ -38,18 +38,28 @@ class RVA(RecycleView):
     """Recycleview of the matches of the first team"""
     def __init__(self, link="", tym="", **kwargs):
         super(RVA, self).__init__(**kwargs)
+        self.response_matches = UrlRequest('https://tolstoj48.pythonanywhere.com/appis/tymy/', 
+            self.build_on_result)
+        
+    def build_on_result(self, req, result):
         app = App.get_running_app()
-        data_matches = app.get_team_data(data_matches=app.response_matches, 
+        data_matches = app.get_team_data(data_matches=self.response_matches.result, 
             team="A-tým", matches=True)
         self.data = [{'text': str(values["souperi"]) + " - " + 
         str(values["vysledek"])} for values in data_matches]
  
+
+#def build_the_rest_recycleviews():
 class RVB(RecycleView):
     """Recycleview of the matches of the second team"""
     def __init__(self, link="", tym="", **kwargs):
         super(RVB, self).__init__(**kwargs)
+        self.response_matches = UrlRequest('https://tolstoj48.pythonanywhere.com/appis/tymy/', 
+            self.build_on_result)
+        
+    def build_on_result(self, req, result):
         app = App.get_running_app()
-        data_matches = app.get_team_data(data_matches=app.response_matches, 
+        data_matches = app.get_team_data(data_matches=self.response_matches.result, 
             team="B-tým", matches=True)
         self.data = [{'text': str(values["souperi"]) + " - " + 
         str(values["vysledek"])} for values in data_matches]
@@ -58,8 +68,12 @@ class RVC(RecycleView):
     """Recycleview of the matches of the third team"""
     def __init__(self, link="", tym="", **kwargs):
         super(RVC, self).__init__(**kwargs)
+        self.response_matches = UrlRequest('https://tolstoj48.pythonanywhere.com/appis/tymy/', 
+            self.build_on_result)
+        
+    def build_on_result(self, req, result):
         app = App.get_running_app()
-        data_matches = app.get_team_data(data_matches=app.response_matches, 
+        data_matches = app.get_team_data(data_matches=self.response_matches.result, 
             team="C-tým", matches=True)
         self.data = [{'text': str(values["souperi"]) + " - " + 
         str(values["vysledek"])} for values in data_matches]
@@ -70,11 +84,25 @@ class MainApp(App):
         self.icon = 'icon.png'
         self.url_req()
         self.manager = ManagerScreen()
-        data_matches = self.get_team_data(data_matches=self.response_matches, 
+        return self.manager
+
+    def url_req(self):
+        """Requests the server api. Stores the data."""
+        self.api_queries =  ['https://tolstoj48.pythonanywhere.com/appis/tymy/',
+            'https://tolstoj48.pythonanywhere.com/appis/rozpisy/',
+            'https://tolstoj48.pythonanywhere.com/appis/aktualni_rozpis/']
+        self.response_matches = UrlRequest(self.api_queries[0], self.success_results_matches)
+        self.response_schedules = UrlRequest(self.api_queries[1], self.success_results_schedules)
+        self.response_recent = UrlRequest(self.api_queries[2], self.success_results_next_matches)
+
+    def success_results_matches(self, req, result):
+        data_matches = self.get_team_data(data_matches=self.response_matches.result, 
             team="", final="all", matches=True)
         for i in data_matches:
             self.fetch_match_detail(i, i["tym"])
-        data_schedules = self.get_team_data(data_matches=self.response_schedules,
+    
+    def success_results_schedules(self, req, result):
+        data_schedules = self.get_team_data(data_matches=self.response_schedules.result,
             matches=False)
         data_schedule_choice = ["rozpis_a", "rozpis_b", "rozpis_c", 
         "rozpis_st_d", "rozpis_ml_d", "rozpis_st_z", "rozpis_ml_z_a", 
@@ -84,20 +112,9 @@ class MainApp(App):
             self.fetch_team_schedules("".join(data), 
                 data_schedule_choice[helper_variable])
             helper_variable += 1
+        
+    def success_results_next_matches(self, req, result):
         self.fetch_next_matches()
-        return self.manager
-
-    def url_req(self):
-        """Requests the server api. Stores the data."""
-        self.api_queries =  ['https://tolstoj48.pythonanywhere.com/appis/tymy/',
-            'https://tolstoj48.pythonanywhere.com/appis/rozpisy/',
-            'https://tolstoj48.pythonanywhere.com/appis/aktualni_rozpis/']
-        self.response_matches = requests.get(self.api_queries[0])
-        self.response_matches = self.response_matches.json()
-        self.response_schedules = requests.get(self.api_queries[1])
-        self.response_schedules = self.response_schedules.json()
-        self.response_recent = requests.get(self.api_queries[2])
-        self.response_recent = self.response_recent.json()
 
     def fetch_match_detail(self, data, tym):
         """Creates the screens for the display of the details of the 
@@ -169,7 +186,7 @@ class MainApp(App):
         """Returns only data from request to the api to the 
         fetch_next_matches() method.
         """
-        return "".join(self.response_recent[0])
+        return "".join(self.response_recent.result[0])
 
     def get_team_data(self, data_matches="", team="", final="", matches=""):
         """Format the requested data to suitable list format for all the input 
