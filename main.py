@@ -9,8 +9,10 @@ from kivy.properties import StringProperty, ListProperty
 from functools import partial
 from kivy.uix.scrollview import ScrollView
 from kivy.network.urlrequest import UrlRequest
+from kivy.uix.popup import Popup
+from kivy.cache import Cache
+import certifi as cfi
 import requests
-import json
 
 class ManagerScreen(ScreenManager):
     pass
@@ -30,36 +32,31 @@ class CTeamScreen(Screen):
 class RozpisyScreen(Screen):
     pass
 
-
 class ScrollableLabel(ScrollView):
     text = StringProperty('')
+
+class Popupnoconn_label(Label):
+    pass
+
+class Popupnoconn_button(Button):
+    pass
 
 class RVA(RecycleView):
     """Recycleview of the matches of the first team"""
     def __init__(self, link="", tym="", **kwargs):
         super(RVA, self).__init__(**kwargs)
-        self.response_matches = UrlRequest('https://tolstoj48.pythonanywhere.com/appis/tymy/', 
-            self.build_on_result)
-        
-    def build_on_result(self, req, result):
         app = App.get_running_app()
-        data_matches = app.get_team_data(data_matches=self.response_matches.result, 
-            team="A-tým", matches=True)
+        data_matches = app.get_team_data(data_matches=Cache.get("tymy", "tymy_vysledky"),
+                team="A-tým", matches=True)
         self.data = [{'text': str(values["souperi"]) + " - " + 
         str(values["vysledek"])} for values in data_matches]
  
-
-#def build_the_rest_recycleviews():
 class RVB(RecycleView):
     """Recycleview of the matches of the second team"""
     def __init__(self, link="", tym="", **kwargs):
         super(RVB, self).__init__(**kwargs)
-        self.response_matches = UrlRequest('https://tolstoj48.pythonanywhere.com/appis/tymy/', 
-            self.build_on_result)
-        
-    def build_on_result(self, req, result):
         app = App.get_running_app()
-        data_matches = app.get_team_data(data_matches=self.response_matches.result, 
+        data_matches = app.get_team_data(data_matches=Cache.get("tymy", "tymy_vysledky"), 
             team="B-tým", matches=True)
         self.data = [{'text': str(values["souperi"]) + " - " + 
         str(values["vysledek"])} for values in data_matches]
@@ -68,42 +65,100 @@ class RVC(RecycleView):
     """Recycleview of the matches of the third team"""
     def __init__(self, link="", tym="", **kwargs):
         super(RVC, self).__init__(**kwargs)
-        self.response_matches = UrlRequest('https://tolstoj48.pythonanywhere.com/appis/tymy/', 
-            self.build_on_result)
-        
-    def build_on_result(self, req, result):
         app = App.get_running_app()
-        data_matches = app.get_team_data(data_matches=self.response_matches.result, 
+        data_matches = app.get_team_data(data_matches=Cache.get("tymy", "tymy_vysledky"), 
             team="C-tým", matches=True)
         self.data = [{'text': str(values["souperi"]) + " - " + 
         str(values["vysledek"])} for values in data_matches]
 
 class MainApp(App):
     """Main app building class."""
+
+    def on_pause(self):
+        """On pause kivy."""
+        return True
+
     def build(self):
+        """Build."""
         self.icon = 'icon.png'
-        self.url_req()
-        self.manager = ManagerScreen()
-        return self.manager
+        try:
+            req = requests.get('https://tolstoj48.pythonanywhere.com/appis/tymy/')
+        except:
+            self.pop_up_no_connection()
+        else:
+            self.pop_up()
+            result = req.json()
+            Cache.register('tymy', limit=1, timeout=20)
+            key = "tymy_vysledky"
+            instance = result
+            Cache.append("tymy", key, instance)
+            self.manager = ManagerScreen()
+            self.url_req()
+            return self.manager
 
     def url_req(self):
         """Requests the server api. Stores the data."""
-        self.api_queries =  ['https://tolstoj48.pythonanywhere.com/appis/tymy/',
-            'https://tolstoj48.pythonanywhere.com/appis/rozpisy/',
+        self.api_queries =  ['https://tolstoj48.pythonanywhere.com/appis/rozpisy/',
             'https://tolstoj48.pythonanywhere.com/appis/aktualni_rozpis/']
-        self.response_matches = UrlRequest(self.api_queries[0], self.success_results_matches)
-        self.response_schedules = UrlRequest(self.api_queries[1], self.success_results_schedules)
-        self.response_recent = UrlRequest(self.api_queries[2], self.success_results_next_matches)
+        self.response_matches_result = Cache.get("tymy", "tymy_vysledky")
+        self.success_results_matches()
+        self.response_schedules = UrlRequest(self.api_queries[0], 
+            on_success=self.success_results_schedules, 
+            on_error=self.pop_up_no_connection,ca_file=cfi.where(), 
+            verify=True)
+        self.response_recent = UrlRequest(self.api_queries[1], 
+            on_success=self.success_results_next_matches, 
+            on_error=self.pop_up_no_connection,
+            ca_file=cfi.where(), verify=True)
 
-    def success_results_matches(self, req, result):
-        data_matches = self.get_team_data(data_matches=self.response_matches.result, 
+    def pop_up(self, *args):
+        """Popups when the data are downloaded."""
+        self.popup = Popup(title='Sokol Stodůlky', size_hint=(0.5 , 0.5), 
+            separator_height = 0)
+        dism = Label(text="Aplikace stahuje data...", size_hint=(1,1), 
+            valign="middle", halign="center")
+        self.popup.bind(on_dismiss=self.check_result)
+        self.popup.add_widget(dism)
+        dism.text_size = (dism.parent.width * 2, dism.parent.height * 2)
+        self.popup.open()
+
+    def pop_up_no_connection(self, *args):
+        """Popups when the device is without connection."""
+        self.popup_no_conn = Popup(title='Nedostupné internetové připojení', 
+            size_hint=(1 , 1))
+        dism = BoxLayout(orientation="vertical")
+        label = Popupnoconn_label(text = "Vypněte aplikaci, připojte se a znovu ji zapněte")
+        #label.size = label.texture_size
+        button = Popupnoconn_button(text="Vypnout aplikaci")
+        dism.add_widget(label)
+        dism.add_widget(button)
+        button.bind(on_release=self.kill)
+        self.popup_no_conn.add_widget(dism)
+        self.popup_no_conn.bind(on_dismiss=self.check_result)
+        self.popup_no_conn.open()
+
+    def kill(self, *args):
+        App.get_running_app().stop()
+
+    def check_result(self, *args):
+        return True
+
+    def let_dismiss(self, *args):
+        return False
+
+    def success_results_matches(self):
+        """Process the obtained data of the played matches."""
+        self.popup.unbind(on_dismiss=self.check_result)
+        self.popup.dismiss()
+        data_matches = self.get_team_data(data_matches=self.response_matches_result, 
             team="", final="all", matches=True)
         for i in data_matches:
             self.fetch_match_detail(i, i["tym"])
     
     def success_results_schedules(self, req, result):
-        data_schedules = self.get_team_data(data_matches=self.response_schedules.result,
-            matches=False)
+        """Process the obtained data of the scheduled matches."""
+        data_schedules = self.get_team_data(data_matches=
+            self.response_schedules.result, matches=False)
         data_schedule_choice = ["rozpis_a", "rozpis_b", "rozpis_c", 
         "rozpis_st_d", "rozpis_ml_d", "rozpis_st_z", "rozpis_ml_z_a", 
         "rozpis_ml_z_b", "rozpis_ml_z_c"]
@@ -114,6 +169,7 @@ class MainApp(App):
             helper_variable += 1
         
     def success_results_next_matches(self, req, result):
+        """Process the obtained data of the planned scheduled matches."""
         self.fetch_next_matches()
 
     def fetch_match_detail(self, data, tym):

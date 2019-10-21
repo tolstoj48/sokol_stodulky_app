@@ -1,7 +1,7 @@
 #:kivy 1.11.1
 
 <ManagerScreen>:
-	canvas.before:
+    canvas.before:
         Color:
             rgba: 1, 1, 1, 1
         Rectangle:
@@ -173,9 +173,9 @@
     on_release: app.root.current = "%s"%(self.text)
 
 <Button>
-	background_normal: ""
+    background_normal: ""
     background_color: .03,.27,.61,0.85
-	color: 1,1,1,1
+    color: 1,1,1,1
     canvas.before:
         Color:
             rgba: 0, 0, 0, 1
@@ -184,11 +184,11 @@
             rectangle: self.x, self.y, self.width, self.height
 
 <Label>
-	background_normal: ""
-	background_color: .03,.27,.61,0.85
-	padding_x: 10
-	padding_y: 10
-	canvas.before:
+    background_normal: ""
+    background_color: .03,.27,.61,0.85
+    padding_x: 10
+    padding_y: 10
+    canvas.before:
         Color:
             rgba: 0, 0, 0, 1
         Line:
@@ -196,7 +196,7 @@
             rectangle: self.x, self.y, self.width, self.height
 
 <BoxLayout>
-	padding: 10
+    padding: 10
 
 <ScrollableLabel>:
     Label:
@@ -206,3 +206,17 @@
         text_size: self.width, None
         markup: True
         text: root.text
+
+<Popupnoconn_label>
+    size_hint_y: None
+    height: self.texture_size[1]
+    text_size: self.width, None
+    size_hint:1, 0.5
+    halign: "center"
+
+<Popupnoconn_button>
+    size_hint_y: None
+    height: self.texture_size[1]
+    text_size: self.width, None
+    size_hint:1, 0.5
+    halign: "center"
